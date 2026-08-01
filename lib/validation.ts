@@ -1,0 +1,3 @@
+export const COLUMN_TITLE_MAX_LENGTH = 24;
+export const TODO_TITLE_MAX_LENGTH = 24;
+export const TODO_DESCRIPTION_MAX_LENGTH = 256;
