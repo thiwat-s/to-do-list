@@ -169,7 +169,12 @@ export default function TodoList({ initialBoard }: TodoListProps) {
     return groups;
   }, [board.columns, board.todos]);
 
-  const completedCount = board.todos.filter((todo) => todo.completed).length;
+  const doneColumnId = board.columns.find(
+    (column) => column.title.trim().toLowerCase() === "done"
+  )?._id;
+  const completedCount = doneColumnId
+    ? board.todos.filter((todo) => todo.columnId === doneColumnId).length
+    : 0;
   const canCreateColumn = newColumnTitle.trim().length > 0 && !pending;
 
   async function request<T>(input: string, init?: RequestInit) {
