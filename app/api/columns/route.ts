@@ -38,8 +38,21 @@ export async function POST(request: NextRequest) {
 
   await connectToDatabase();
 
+  const normalizedTitle = body.title.trim();
+  const columns = await Column.find().select("title").lean();
+  const duplicate = columns.some(
+    (column) => column.title.trim().toLowerCase() === normalizedTitle.toLowerCase()
+  );
+
+  if (duplicate) {
+    return NextResponse.json(
+      { error: "A column with this name already exists." },
+      { status: 409 }
+    );
+  }
+
   const column = await Column.create({
-    title: body.title.trim(),
+    title: normalizedTitle,
     color: body.color ?? (await pickNextColumnColor()),
     order: await getNextColumnOrder(),
   });

@@ -42,6 +42,18 @@ export async function PATCH(
 
   await connectToDatabase();
 
+  const columns = await Column.find({ _id: { $ne: id } }).select("title").lean();
+  const duplicate = columns.some(
+    (column) => column.title.trim().toLowerCase() === title.toLowerCase()
+  );
+
+  if (duplicate) {
+    return NextResponse.json(
+      { error: "A column with this name already exists." },
+      { status: 409 }
+    );
+  }
+
   const updates: Record<string, unknown> = { title };
 
   if (color !== undefined) {
@@ -73,6 +85,15 @@ export async function DELETE(
   await connectToDatabase();
 
   const columns = await Column.find().sort({ order: 1 }).lean();
+
+  const columnToDelete = columns.find((column) => String(column._id) === id);
+
+  if (columnToDelete?.title.trim().toLowerCase() === "done") {
+    return NextResponse.json(
+      { error: "The Done column cannot be deleted." },
+      { status: 400 }
+    );
+  }
 
   if (columns.length <= 1) {
     return NextResponse.json(

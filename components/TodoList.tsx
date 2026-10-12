@@ -172,10 +172,15 @@ export default function TodoList({ initialBoard }: TodoListProps) {
   const doneColumnId = board.columns.find(
     (column) => column.title.trim().toLowerCase() === "done"
   )?._id;
+  const isDoneColumn = (column: ColumnItem) =>
+    column.title.trim().toLowerCase() === "done";
+  const duplicateColumnTitle = board.columns.some(
+    (column) => column.title.trim().toLowerCase() === newColumnTitle.trim().toLowerCase()
+  );
   const completedCount = doneColumnId
     ? board.todos.filter((todo) => todo.columnId === doneColumnId).length
     : 0;
-  const canCreateColumn = newColumnTitle.trim().length > 0 && !pending;
+  const canCreateColumn = newColumnTitle.trim().length > 0 && !duplicateColumnTitle && !pending;
 
   async function request<T>(input: string, init?: RequestInit) {
     const response = await fetch(input, {
@@ -556,6 +561,11 @@ export default function TodoList({ initialBoard }: TodoListProps) {
                   <p className="mt-2 text-right text-xs text-slate-400">
                     {newColumnTitle.length}/{COLUMN_TITLE_MAX_LENGTH}
                   </p>
+                  {duplicateColumnTitle ? (
+                    <p className="mt-1 text-sm text-rose-600">
+                      A column with this name already exists.
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="pt-1">
@@ -641,20 +651,24 @@ export default function TodoList({ initialBoard }: TodoListProps) {
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => openEditColumnDialog(column)}
-                            className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => openDeleteColumnDialog(column)}
-                            className="rounded-lg border border-rose-200 px-2.5 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-50"
-                          >
-                            Delete
-                          </button>
+                          {!isDoneColumn(column) ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => openEditColumnDialog(column)}
+                                className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => openDeleteColumnDialog(column)}
+                                className="rounded-lg border border-rose-200 px-2.5 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-50"
+                              >
+                                Delete
+                              </button>
+                            </>
+                          ) : null}
                         </div>
                       </div>
 
